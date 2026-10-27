@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JARVIS AI</title>
+<style>
+body{background:#020914;color:#00d9ff;font-family:Arial;text-align:center;padding:20px}
+h1{letter-spacing:7px;text-shadow:0 0 15px #00d9ff}
+.orb{width:150px;height:150px;border:3px solid #00d9ff;border-radius:50%;
+margin:35px auto;display:grid;place-items:center;font-size:38px;
+box-shadow:0 0 35px #00d9ff;animation:pulse 2s infinite}
+@keyframes pulse{50%{transform:scale(1.05);box-shadow:0 0 60px #008cff}}
+#reply{padding:16px;background:#071827;border-radius:12px;line-height:1.6}
+input{width:90%;padding:13px;background:#071827;color:white;border:1px solid #00d9ff;border-radius:10px}
+button{padding:13px;margin:7px;background:#073047;color:#00d9ff;border:1px solid #00d9ff;border-radius:10px}
+</style>
+</head>
+<body>
+<h1>J.A.R.V.I.S</h1>
+<p>PERSONAL AI SYSTEM</p>
+<div class="orb">AI</div>
+<p id="status">SYSTEM ONLINE</p>
+<div id="reply">Namaste! Main JARVIS hoon. Mujhse Hindi mein baat karo.</div>
+<br>
+<input id="msg" placeholder="Apna sawaal likho...">
+<br>
+<button onclick="ask()">Send</button>
+<button onclick="listen()">🎙️ Bolo</button>
+<button onclick="speechSynthesis.cancel()">🔇 Stop</button>
+<script>
+function say(t){
+ const u=new SpeechSynthesisUtterance(t);
+ u.lang="hi-IN";speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+async function ask(text){
+ text=(text||document.getElementById("msg").value).trim();
+ if(!text)return;
+ document.getElementById("reply").textContent="JARVIS soch raha hai...";
+ document.getElementById("status").textContent="PROCESSING";
+ try{
+  const r=await fetch("/api/chat",{method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({message:text})});
+  const d=await r.json();
+  if(!r.ok)throw Error(d.error||"Connection error");
+  document.getElementById("reply").textContent=d.reply;
+  document.getElementById("status").textContent="SYSTEM ONLINE";
+  say(d.reply);
+ }catch(e){
+  document.getElementById("reply").textContent="AI connect nahi hua. Server aur API settings check karo.";
+  document.getElementById("status").textContent="CONNECTION ERROR";
+ }
+}
+function listen(){
+ const S=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!S){alert("Chrome mein voice recognition try karo.");return;}
+ const r=new S();r.lang="hi-IN";
+ r.onstart=()=>document.getElementById("status").textContent="LISTENING...";
+ r.onresult=e=>ask(e.results[0][0].transcript);
+ r.onerror=()=>document.getElementById("status").textContent="MIC ERROR";
+ r.start();
+}
+</script>
+</body>
+</html>
