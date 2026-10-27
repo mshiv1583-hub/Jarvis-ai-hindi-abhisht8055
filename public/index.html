@@ -1,66 +1,121 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JARVIS AI</title>
+<meta name="theme-color" content="#080608">
+<title>ULTRON AI | Hindi Voice Assistant</title>
 <style>
-body{background:#020914;color:#00d9ff;font-family:Arial;text-align:center;padding:20px}
-h1{letter-spacing:7px;text-shadow:0 0 15px #00d9ff}
-.orb{width:150px;height:150px;border:3px solid #00d9ff;border-radius:50%;
-margin:35px auto;display:grid;place-items:center;font-size:38px;
-box-shadow:0 0 35px #00d9ff;animation:pulse 2s infinite}
-@keyframes pulse{50%{transform:scale(1.05);box-shadow:0 0 60px #008cff}}
-#reply{padding:16px;background:#071827;border-radius:12px;line-height:1.6}
-input{width:90%;padding:13px;background:#071827;color:white;border:1px solid #00d9ff;border-radius:10px}
-button{padding:13px;margin:7px;background:#073047;color:#00d9ff;border:1px solid #00d9ff;border-radius:10px}
+*{box-sizing:border-box}
+:root{color-scheme:dark}
+body{margin:0;background:#080608;color:#ffe9e9;font-family:Arial,sans-serif}
+.app{min-height:100dvh;max-width:760px;margin:auto;padding:20px 16px;display:flex;flex-direction:column}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #492026;padding:8px 0 18px}
+.brand{font-size:20px;font-weight:900;letter-spacing:3px;color:#ff303e}
+.status{font-size:11px;color:#ff7b82;letter-spacing:1px}
+main{flex:1;display:flex;flex-direction:column;align-items:center}
+h1{font-size:15px;letter-spacing:4px;margin:24px 0 4px}
+.sub{font-size:12px;color:#a58b8e}
+.robot{width:190px;height:190px;margin:24px auto 16px;position:relative;display:grid;place-items:center}
+.ring{position:absolute;inset:5px;border:1px solid #ff2637;border-radius:50%;box-shadow:0 0 25px #b90024,inset 0 0 20px #59000e;animation:spin 12s linear infinite}
+.ring:before,.ring:after{content:"";position:absolute;border:1px dashed #ff5260;border-radius:50%;inset:13px}
+.ring:after{inset:-8px;border-color:#79101b}
+@keyframes spin{to{transform:rotate(360deg)}}
+.face{position:relative;width:105px;height:120px;border:2px solid #ff3445;background:linear-gradient(145deg,#3b1118,#10090c 60%,#310b12);clip-path:polygon(20% 0,80% 0,100% 25%,88% 82%,65% 100%,35% 100%,12% 82%,0 25%);filter:drop-shadow(0 0 15px #ff122b)}
+.eyes{display:flex;justify-content:space-around;padding-top:35px}
+.eye{width:27px;height:9px;background:#ff233a;transform:skew(-25deg);box-shadow:0 0 15px #ff001e;animation:pulse 1.5s infinite alternate}
+@keyframes pulse{to{opacity:.45;box-shadow:0 0 4px #ff001e}}
+.nose{width:2px;height:19px;background:#ff3344;margin:10px auto 0}
+.mouth{width:34px;height:5px;background:#ff3445;margin:5px auto;box-shadow:0 0 8px red}
+.robot.talking .ring{animation-duration:1.5s}
+.robot.listening .ring{border-width:4px;animation-duration:2s}
+#reply{width:100%;min-height:88px;border:1px solid #57202a;background:#110b0e;border-radius:12px;padding:15px;line-height:1.55;font-size:14px;white-space:pre-wrap}
+#reply:before{content:"SYSTEM RESPONSE";display:block;color:#ff4352;font-size:10px;letter-spacing:2px;margin-bottom:8px}
+.controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:18px 0}
+button{border:1px solid #ff3547;background:#18090d;color:#fff;padding:13px 17px;border-radius:9px;font-weight:bold;cursor:pointer}
+button.primary{background:#d20d27;box-shadow:0 0 18px #720819}
+button:active{transform:scale(.97)}
+.entry{display:flex;gap:8px;width:100%;margin-top:auto}
+input{flex:1;min-width:0;background:#100b0d;border:1px solid #57202a;border-radius:9px;color:white;padding:14px;font-size:15px}
+footer{text-align:center;color:#775d61;font-size:10px;letter-spacing:2px;margin-top:20px}
 </style>
 </head>
 <body>
-<h1>J.A.R.V.I.S</h1>
-<p>PERSONAL AI SYSTEM</p>
-<div class="orb">AI</div>
-<p id="status">SYSTEM ONLINE</p>
-<div id="reply">Namaste! Main JARVIS hoon. Mujhse Hindi mein baat karo.</div>
-<br>
-<input id="msg" placeholder="Apna sawaal likho...">
-<br>
-<button onclick="ask()">Send</button>
-<button onclick="listen()">🎙️ Bolo</button>
-<button onclick="speechSynthesis.cancel()">🔇 Stop</button>
+<div class="app">
+<header>
+  <div class="brand">ULTRON<span style="color:white"> / AI</span></div>
+  <div class="status" id="status">● STANDBY</div>
+</header>
+<main>
+  <h1>VOICE INTERFACE</h1>
+  <div class="sub">HINDI AI • AUDIO SYSTEM</div>
+  <div class="robot" id="robot">
+    <div class="ring"></div>
+    <div class="face">
+      <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+      <div class="nose"></div><div class="mouth"></div>
+    </div>
+  </div>
+  <div class="sub" id="hint">SYSTEM ONLINE • TAP MIC TO SPEAK</div>
+  <div id="reply" style="margin-top:18px">नमस्ते! मैं तुम्हारा AI assistant हूँ। मुझसे हिंदी में बात करो।</div>
+  <div class="controls">
+    <button class="primary" id="mic">🎙 बोलो</button>
+    <button id="stop">■ आवाज़ रोकें</button>
+  </div>
+</main>
+<form class="entry" id="form">
+  <input id="message" placeholder="अपना सवाल लिखो..." autocomplete="off">
+  <button class="primary" type="submit">भेजो ➤</button>
+</form>
+<footer>NEURAL INTERFACE // RED PROTOCOL</footer>
+</div>
 <script>
-function say(t){
- const u=new SpeechSynthesisUtterance(t);
- u.lang="hi-IN";speechSynthesis.cancel();speechSynthesis.speak(u);
+const $=id=>document.getElementById(id);
+let recognition=null, busy=false;
+const history=[];
+function status(s,h){$("status").textContent="● "+s;$("hint").textContent=h}
+function speak(text){
+  if(!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="hi-IN";u.rate=1;u.pitch=.85;
+  u.onstart=()=>{$("robot").classList.add("talking");status("SPEAKING","JARVIS IS RESPONDING")};
+  u.onend=()=>{$("robot").classList.remove("talking");status("STANDBY","TAP MIC TO SPEAK")};
+  speechSynthesis.speak(u);
 }
-async function ask(text){
- text=(text||document.getElementById("msg").value).trim();
- if(!text)return;
- document.getElementById("reply").textContent="JARVIS soch raha hai...";
- document.getElementById("status").textContent="PROCESSING";
- try{
-  const r=await fetch("/api/chat",{method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({message:text})});
-  const d=await r.json();
-  if(!r.ok)throw Error(d.error||"Connection error");
-  document.getElementById("reply").textContent=d.reply;
-  document.getElementById("status").textContent="SYSTEM ONLINE";
-  say(d.reply);
- }catch(e){
-  document.getElementById("reply").textContent="AI connect nahi hua. Server aur API settings check karo.";
-  document.getElementById("status").textContent="CONNECTION ERROR";
- }
+async function send(text){
+  if(busy||!text.trim())return;
+  busy=true;$("message").value="";
+  $("reply").textContent="सोच रहा हूँ...";
+  status("PROCESSING","AI RESPONSE INCOMING");
+  try{
+    const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,history:history.slice(-8)})});
+    const data=await r.json();
+    if(!r.ok)throw Error(data.error||"Server error");
+    const answer=data.reply||"मुझे जवाब नहीं मिला।";
+    history.push({role:"user",content:text},{role:"assistant",content:answer});
+    $("reply").textContent=answer;
+    speak(answer);
+  }catch(e){
+    $("reply").textContent="कनेक्शन में समस्या है: "+e.message+"। Server और API key जाँचो।";
+    status("CONNECTION ERROR","SERVER CHECK REQUIRED");
+  }finally{busy=false}
 }
-function listen(){
- const S=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!S){alert("Chrome mein voice recognition try karo.");return;}
- const r=new S();r.lang="hi-IN";
- r.onstart=()=>document.getElementById("status").textContent="LISTENING...";
- r.onresult=e=>ask(e.results[0][0].transcript);
- r.onerror=()=>document.getElementById("status").textContent="MIC ERROR";
- r.start();
-}
+$("form").addEventListener("submit",e=>{e.preventDefault();send($("message").value)});
+$("stop").onclick=()=>{speechSynthesis.cancel();if(recognition)recognition.stop();$("robot").classList.remove("talking","listening");status("STANDBY","AUDIO STOPPED")};
+$("mic").onclick=()=>{
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert("Voice input support nahi mila. Android Chrome mein microphone permission check karo.");return}
+  if(recognition)recognition.stop();
+  recognition=new SR();recognition.lang="hi-IN";recognition.interimResults=false;recognition.maxAlternatives=1;
+  recognition.onstart=()=>{$("robot").classList.add("listening");status("LISTENING","AB BOLO...")};
+  recognition.onresult=e=>{const t=e.results[0][0].transcript;$("message").value=t;send(t)};
+  recognition.onerror=e=>{status("MIC ERROR",e.error);$("robot").classList.remove("listening")};
+  recognition.onend=()=>{$("robot").classList.remove("listening");if(!busy)status("STANDBY","TAP MIC TO SPEAK")};
+  recognition.start();
+};
 </script>
 </body>
-</html>
+                                                                                             </html>
+ 
